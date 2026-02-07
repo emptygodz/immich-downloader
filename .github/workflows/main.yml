@@ -11,11 +11,13 @@ jobs:
     steps:
       - name: Pull and Save Images
         run: |
+          # 核心修正 2：必须加上 ghcr.io/ 前缀
           docker pull ghcr.io/immich-app/immich-server:release
           docker pull ghcr.io/immich-app/immich-machine-learning:release
           docker pull redis:6.2-alpine
           docker pull postgres:14-alpine
           
+          # 打包成离线 .tar 文件
           docker save -o immich_all.tar \
             ghcr.io/immich-app/immich-server:release \
             ghcr.io/immich-app/immich-machine-learning:release \
@@ -32,8 +34,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          # 核心修正 2：必须指定一个唯一的标签名
-          tag_name: "v1.0.${{ github.run_number }}"
+          # 使用运行 ID 作为标签，这样你每次运行都能生成唯一的下载链接
+          tag_name: "release-${{ github.run_id }}"
           files: immich_all.tar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
