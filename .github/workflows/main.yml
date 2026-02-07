@@ -1,7 +1,7 @@
 name: Download Immich Images
 on: [workflow_dispatch]
 
-# 核心修正：在代码里也显式声明写权限
+# 核心修正 1：在代码里强行开启写入权限
 permissions:
   contents: write
 
@@ -30,10 +30,9 @@ jobs:
           retention-days: 1
 
       - name: Create Release
-        # 升级到 v2 版本，它对 Token 的处理更稳健
         uses: softprops/action-gh-release@v2
         with:
-          # 必须手动指定 tag_name，否则就会报你刚才看到的那个错
+          # 核心修正 2：必须指定一个唯一的标签名
           tag_name: "v1.0.${{ github.run_number }}"
           files: immich_all.tar
         env:
