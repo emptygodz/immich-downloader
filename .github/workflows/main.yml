@@ -1,13 +1,17 @@
 name: Download Immich Images
 on: [workflow_dispatch]
 
+# 核心修正 1：必须声明权限，否则无法创建 Release 链接
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Pull and Save Images
         run: |
-          # 1. 拉取镜像（修正标签为 :release 以匹配官方仓库）
+          # 1. 拉取镜像
           docker pull ghcr.io/immich-app/immich-server:release
           docker pull ghcr.io/immich-app/immich-machine-learning:release
           docker pull redis:6.2-alpine
@@ -26,3 +30,13 @@ jobs:
           name: immich-package
           path: immich_all.tar
           retention-days: 1
+
+      # 核心修正 2：缩进对齐，并使用动态标签防止冲突
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          # 使用运行 ID 作为标签，这样你每次点击运行都不会因为标签重复而报错
+          tag_name: release-${{ github.run_id }}
+          files: immich_all.tar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}}}
